@@ -11,11 +11,18 @@ export function parseSheet(workbook: XLSX.WorkBook, sheetName: string): ParsedFi
     console.log(jsonData)
     console.log(colNames)
 
+    const offsetMs = new Date().getTimezoneOffset() * 60 * 1000
+
     const colData : ColumnSchema[] = colNames.map((col)=>{
         const colValues: CellValue[] = jsonData.map(row => {
-            const val = row[col]
+            let val = row[col]
             // Strip Excel formulas — treat them as null
             if (typeof val === 'string' && val.startsWith('=')) return null
+
+            if (val instanceof Date) {
+                val = new Date(val.getTime() - offsetMs)
+                console.log(val)
+            }
             return val
         })
 
