@@ -8,27 +8,26 @@ from app.models.chat import ColumnSchema
 
 T = TypeVar('T', bound=BaseModel)
 
-
 def make_llm(output_schema: Type[T], temperature: float = 0):
     """
-    Creates a Gemini LLM with Groq as automatic fallback.
+    Creates a Groq LLM with Gemini as automatic fallback.
     
-    If Gemini hits a rate limit or any error, LangChain automatically
-    retries the same call using Groq llama-3.3-70b.
+    If Groq hits a rate limit or any error, LangChain automatically
+    retries the same call using Gemini.
     
     temperature=0   → classification and SQL nodes (deterministic)
     temperature=0.3 → answer and insight nodes (natural language variation)
     """
 
-    # ── Primary: Gemini ──────────────────────────────────────────────
-    primary = ChatGoogleGenerativeAI(
+    # ── Fallback: Gemini ──────────────────────────────────────────────
+    fallback = ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",
         google_api_key=os.environ.get("GEMINI_API_KEY"),
         temperature=temperature,
     ).with_structured_output(output_schema)
 
-    # ── Fallback: Groq Llama 3.3 70B ────────────────────────────────
-    fallback = ChatGroq(
+    # ── Primary: Groq Llama 3.3 70B ────────────────────────────────
+    primary = ChatGroq(
         model="llama-3.3-70b-versatile",
         api_key=os.environ.get("GROQ_API_KEY"),
         temperature=temperature,
