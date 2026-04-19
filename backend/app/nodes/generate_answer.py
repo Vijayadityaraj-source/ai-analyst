@@ -64,10 +64,10 @@ def generate_answer(state: GraphState) -> dict:
             "query_result": formatted_result
         })
         
-        # print(f"[generate_answer] reasoning: {result.reasoning}")
-        # print(f"[generate_answer] text: {result.text}")
-        # print(f"[generate_answer] insights: {result.insights}")
-        # print(f"[generate_answer] followUps: {result.followUps}")
+        print(f"[generate_answer] reasoning: {result.reasoning}")
+        print(f"[generate_answer] text: {result.text}")
+        print(f"[generate_answer] insights: {result.insights}")
+        print(f"[generate_answer] followUps: {result.followUps}")
 
         return {
             "generated_answer": GeneratedAnswerResult(
@@ -78,7 +78,7 @@ def generate_answer(state: GraphState) -> dict:
         }
 
     except Exception as e:
-        # print(f"[generate_answer] error: {e}")
+        print(f"[generate_answer] error: {e}")
         return {
             "generated_answer": GeneratedAnswerResult(
                 text="I encountered an error generating an answer. Please try again.", 

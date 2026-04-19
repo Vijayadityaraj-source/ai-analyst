@@ -59,10 +59,10 @@ def planner(state: GraphState) -> dict:
             "history": format_history(state["history"]),
             "message": state["message"],
         })
-        # print(f"[planner] reasoning: {result.reasoning}")
-        # print(f"[planner] execution_plan: {result.execution_plan}")
+        print(f"[planner] reasoning: {result.reasoning}")
+        print(f"[planner] execution_plan: {result.execution_plan}")
         return {"execution_plan": result.execution_plan}
 
     except Exception as e:
-        # print(f"[planner] error: {e}")
+        print(f"[planner] error: {e}")
         return {"execution_plan": None}

@@ -58,9 +58,9 @@ def fix_sql(state: GraphState) -> dict:
             "sql_error": state["sqlError"].errorMessage,
         })
 
-        # print(f"[fix_sql] reasoning: {result.reasoning}")
-        # print(f"[fix_sql] fixed_sql: {result.fixed_sql}")
-        # print(f"[fix_sql] explanation: {result.explanation}")
+        print(f"[fix_sql] reasoning: {result.reasoning}")
+        print(f"[fix_sql] fixed_sql: {result.fixed_sql}")
+        print(f"[fix_sql] explanation: {result.explanation}")
 
         return {
             "fixed_sql_result": FixedSQLResult(
@@ -71,7 +71,7 @@ def fix_sql(state: GraphState) -> dict:
         }
 
     except Exception as e:
-        # print(f"[fix_sql] error: {e}")
+        print(f"[fix_sql] error: {e}")
         step_number = state["sqlError"].stepNumber if state.get("sqlError") else 0
         return {
             "fixed_sql_result": FixedSQLResult(

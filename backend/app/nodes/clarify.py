@@ -56,13 +56,13 @@ def clarify(state: GraphState) -> dict:
         
         # Log reasoning during development — remove or move to proper
         # logging before production
-        # print(f"[clarify] reasoning: {result.reasoning}")
-        # print(f"[clarify] clarification_question: {result.clarification_question}")
+        print(f"[clarify] reasoning: {result.reasoning}")
+        print(f"[clarify] clarification_question: {result.clarification_question}")
         
         return {"clarification_question": result.clarification_question}
 
     except Exception as e:
         # Safe fallback — treat errors as ambiguous so the graph
         # routes to the clarify node rather than crashing
-        # print(f"[clarify] error: {e}")
+        print(f"[clarify] error: {e}")
         return {"clarification_question": "I need more information to answer that. Could you tell me which columns you're interested in?"}

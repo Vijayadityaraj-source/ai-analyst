@@ -81,13 +81,13 @@ def classify_intent(state: GraphState) -> dict:
         
         # Log reasoning during development — remove or move to proper
         # logging before production
-        # print(f"[classify_intent] reasoning: {result.reasoning}")
-        # print(f"[classify_intent] intent: {result.intent}")
+        print(f"[classify_intent] reasoning: {result.reasoning}")
+        print(f"[classify_intent] intent: {result.intent}")
         
         return {"intent": result.intent}
 
     except Exception as e:
         # Safe fallback — treat errors as ambiguous so the graph
         # routes to the clarify node rather than crashing
-        # print(f"[classify_intent] error: {e}")
+        print(f"[classify_intent] error: {e}")
         return {"intent": "ambiguous"}
