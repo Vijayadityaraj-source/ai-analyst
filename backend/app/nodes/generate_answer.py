@@ -28,17 +28,20 @@ The spreadsheet schema:
 Query results (up to 50 rows):
 {query_result}
 
+Context: {query_context}
+
 GUIDELINES:
 - If query results contain data: reference specific numbers, do not speak in generalities
-- If query results are empty: answer using the schema metadata alone — \
-column names, types, null counts, and sample values are sufficient for \
-questions about the structure of the data
+- If context is 'schema_only': answer confidently from schema metadata alone — no apology needed for missing results
+- If context is 'no_rows_returned': tell the user the query returned no results and explain what that means
 - Be concise — the user wants a quick answer, not a long explanation
-- Do not hallucinate data that is not present in either the results or the schema
-- Optionally include one non-obvious insight about the data
-- Optionally suggest 2-3 follow-up questions the user might want to ask
+- Do not hallucinate data not present in either results or schema
+- Optionally include one non-obvious insight
+- Optionally suggest 2-3 follow-up questions
+- Never perform calculations that combine query result numbers with schema metadata numbers (e.g. dividing a total by uniqueCount). Only reference numbers that appear explicitly in the query results.
 
-Respond with your reasoning first, then the answer."""
+Respond with your reasoning first, then the answer.
+"""
 
 HUMAN_PROMPT = """Recent conversation:
 {history}
@@ -56,12 +59,21 @@ def generate_answer(state: GraphState) -> dict:
 
         query_result = state["query_result"] or []
         formatted_result = json.dumps(query_result[:50], indent=2, default=str)
+
+        # Tell the model why results are empty — removes defensive reasoning
+        if state.get("intent") == "general_question":
+            query_context = "schema_only — this question does not require data rows"
+        elif not query_result:
+            query_context = "no_rows_returned — the SQL query executed but matched no rows"
+        else:
+            query_context = f"{len(query_result)} rows returned from SQL execution"
         
         result: GenerateAnswer = chain.invoke({
             "schema": format_schema(state["schema"]),
             "history": format_history(state["history"]),
             "message": state["message"],
-            "query_result": formatted_result
+            "query_result": formatted_result,
+            "query_context": query_context
         })
         
         print(f"[generate_answer] reasoning: {result.reasoning}")

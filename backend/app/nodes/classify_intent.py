@@ -57,7 +57,10 @@ The boundary between AMBIGUOUS and DATA_QUESTION:
   If you can identify WHICH columns the question refers to → DATA_QUESTION
   If you cannot map the question to specific columns → AMBIGUOUS
 
-Respond with your reasoning first, then the intent."""
+Respond with your reasoning first, then the intent.
+CRITICAL: The intent value must be exactly one of these lowercase strings: ambiguous, data_question, general_question, no_data
+Never use uppercase. Never add underscores differently. Copy exactly as shown.
+"""
 
 HUMAN_PROMPT = """Recent conversation:
 {history}

@@ -23,23 +23,51 @@ SQL RULES — follow these exactly:
 - Only write SELECT statements. Never use INSERT, UPDATE, DELETE, DROP, or CREATE.
 - Always add LIMIT 200 to the final step if not already present.
 - Never generate Python, JavaScript, or any language other than SQL.
+- Only reference column names that exist in the schema above.
+- Boolean values in DuckDB SQL are lowercase: true and false, not True and False.
 
 STEP TYPES — use exactly these values for the `type` field:
-- derive: adds new columns to existing rows, e.g. "add a profit column = revenue minus cost"
-- aggregate: groups and summarises rows, e.g. "total revenue by region"
-- filter: removes rows based on a condition, e.g. "customers with score above 80"
+- derive: adds new columns to existing rows
+- aggregate: groups and summarises rows
+- filter: removes rows based on a condition
 - final_answer: the last step, produces the data the LLM will use to answer
 
 THE needsLLMAfter FIELD:
-Set to true only on the final step. Set to false on all others.
+- The LAST step must ALWAYS have needsLLMAfter: true
+- Every other step must have needsLLMAfter: false
+- Exactly one step gets needsLLMAfter: true — always the last one
 
-EXAMPLE:
-User question: "Show me total revenue by region for customers with score above 80"
-Execution plan:
-1. filter | SELECT * FROM data WHERE score > 80 | → step_1_result | needsLLMAfter: false
-2. aggregate | SELECT region, SUM(revenue) AS total_revenue FROM step_1_result GROUP BY region LIMIT 200 | → step_2_result | needsLLMAfter: true
+EFFICIENCY RULE:
+Only create multiple steps when the output of one step is genuinely needed 
+as input to the next. Never create a step that just does SELECT * FROM data.
+Query data directly whenever possible.
 
-Respond with your reasoning first, then the execution plan."""
+COMPLETENESS RULE:
+Your execution_plan list must contain EVERY step you describe in your reasoning.
+If your reasoning says "first filter, then aggregate" — BOTH steps must appear 
+in the execution_plan list. Count your steps: estimatedStepCount must equal 
+the exact number of ExecutionStep objects in your list.
+
+EXAMPLE OF A CORRECT MULTI-STEP PLAN:
+User question: "Show me total revenue for active customers grouped by region"
+reasoning: "First filter active customers, then aggregate by region"
+execution_plan:
+  Step 1 — filter | SELECT * FROM data WHERE Active = true | step_1_result | needsLLMAfter: false
+  Step 2 — aggregate | SELECT Region, SUM(Revenue) AS total_revenue FROM step_1_result GROUP BY Region LIMIT 200 | step_2_result | needsLLMAfter: true
+estimatedStepCount: 2
+
+Notice: BOTH steps appear. The filter step references data directly. 
+The aggregate step references step_1_result, not data.
+
+EXAMPLE OF A CORRECT SINGLE-STEP PLAN:
+User question: "What is total revenue by region?"
+reasoning: "One aggregate step is enough"
+execution_plan:
+  Step 1 — aggregate | SELECT Region, SUM(Revenue) AS total_revenue FROM data GROUP BY Region LIMIT 200 | step_1_result | needsLLMAfter: true
+estimatedStepCount: 1
+
+Respond with your reasoning first, then the execution plan.
+CRITICAL: The type field for each step must be exactly one of these lowercase strings: derive, aggregate, filter, final_answer"""
 
 HUMAN_PROMPT = """Recent conversation:
 {history}
